@@ -12,6 +12,5 @@ Objective
 The goal is to apply fundamental data structures and algorithms in a practical scenario, simulating a real-world application like a search engine.
 
 Technology Stack
-Programming Language: Java
-Build Tool: Maven - Used for project management and build automation.
-Testing Framework: JUnit - Employed for unit testing to ensure code reliability and quality.
+Java, Maven, JUnit
+
