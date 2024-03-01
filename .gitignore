@@ -1,0 +1,6 @@
+.vscode
+target/
+*.class
+.DS_STORE
+createdFiles.lst
+inputFiles.lst
