@@ -1,0 +1,179 @@
+package edu.yu.cs.com1320.project.stage6.impl;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+
+import edu.yu.cs.com1320.project.stage6.Document;
+
+public class DocumentImpl implements Document {
+    private URI uri;
+    private String txt;
+    private byte[] binaryData;
+    private HashMap<String, String> metaData;
+    private Map<String, Integer> words;
+    private long lastUsedTime;
+
+    public DocumentImpl(URI uri, String text, Map<String, Integer> wordCountMap) {
+        commonConstructor(uri);
+        if (nullOrEmptyString(text)) {
+            throw new IllegalArgumentException();
+        }
+        this.txt = text;
+        if (wordCountMap == null) {
+            this.words = new HashMap<>();
+            String formattedTxt = txt.replaceAll("[^A-Za-z0-9\s]", "");
+            String[] wordsFromTxt = formattedTxt.split(" ");
+            for (String word : wordsFromTxt) {
+                if (this.words.get(word) == null) {
+                    this.words.put(word, 1);
+                } else {
+                    int curVal = this.words.get(word);
+                    this.words.put(word, ++curVal);
+                }
+            }
+        } else {
+            this.words = wordCountMap;
+        }
+    }
+
+    public DocumentImpl(URI uri, byte[] binaryData) {
+        commonConstructor(uri);
+        if (binaryData == null || binaryData.length == 0) {
+            throw new IllegalArgumentException();
+        }
+        this.binaryData = binaryData;
+        this.words = null;
+    }
+
+    private void commonConstructor(URI uri) {
+        if (uri == null || uri.getPath().isBlank()) {
+            throw new IllegalArgumentException();
+        }
+        this.uri = uri;
+        this.metaData = new HashMap<>();
+        this.lastUsedTime = System.nanoTime();
+    }
+
+    private boolean nullOrEmptyString(String str) {
+        if (str == null || str.isBlank()) {
+            return true;
+        }
+        return false;
+    }
+
+    public String setMetadataValue(String key, String value) {
+        if (nullOrEmptyString(key)) {
+            throw new IllegalArgumentException();
+        }
+        return this.metaData.put(key, value);
+    }
+
+    public void setMetadata(HashMap<String, String> metadata) {
+        if (metadata == null) {
+            return;
+        }
+        this.metaData = metadata;
+    }
+
+    public String getMetadataValue(String key) {
+        if (nullOrEmptyString(key)) {
+            throw new IllegalArgumentException();
+        }
+        return this.metaData.get(key);
+    }
+
+    public HashMap<String, String> getMetadata() {
+        HashMap<String, String> copy = new HashMap<>();
+        for (String key : this.metaData.keySet()) {
+            copy.put(key, this.metaData.get(key));
+        }
+        return copy;
+    }
+
+    public String getDocumentTxt() {
+        return this.txt;
+    }
+
+    public byte[] getDocumentBinaryData() {
+        return this.binaryData;
+    }
+
+    public URI getKey() {
+        return this.uri;
+    }
+
+    public int wordCount(String word) {
+        if (this.getDocumentBinaryData() != null || this.words.get(word) == null) {
+            return 0;
+        }
+        return this.words.get(word);
+    }
+
+    public Set<String> getWords() {
+        if (this.getDocumentBinaryData() != null) {
+            return new HashSet<>();
+        }
+        return this.words.keySet();
+    }
+
+    public long getLastUseTime() {
+        return this.lastUsedTime;
+    }
+
+    public void setLastUseTime(long timeInNanoseconds) {
+        this.lastUsedTime = timeInNanoseconds;
+    }
+
+    public HashMap<String, Integer> getWordMap() {
+        return (HashMap<String, Integer>) this.words;
+    }
+
+    public void setWordMap(HashMap<String, Integer> wordMap) {
+        if (wordMap == null) {
+            return;
+        }
+        this.words = wordMap;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uri.hashCode();
+        result = 31 * result + (this.txt != null ? this.txt.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(this.binaryData);
+        return Math.abs(result);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        DocumentImpl doc = (DocumentImpl) obj;
+        if (doc.uri.equals(this.uri) && Objects.equals(doc.txt, this.txt)
+                && Arrays.equals(doc.binaryData, this.binaryData)
+                && doc.metaData.equals(this.metaData)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int compareTo(Document doc) {
+        if (this.lastUsedTime - doc.getLastUseTime() > 0) {
+            return 1;
+        } else if (this.lastUsedTime - doc.getLastUseTime() < 0) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+}
